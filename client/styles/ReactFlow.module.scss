@@ -1,55 +1,65 @@
-.dndflow {
+@import "./variables";
+
+.deevlopHeading {
+  color: $analysa-grey;
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  b {
+    color: $analysa-purple;
+    font-weight: 500;
+  }
+}
+.floatingedges {
   flex-direction: column;
   display: flex;
   flex-grow: 1;
   height: 100vh;
-  .reactflowWrapper {
-    flex-grow: 1;
-    height: 100%;
-  }
-}
 
-.aside {
-  border-right: 1px solid #eee;
-  padding: 15px 10px;
-  font-size: 12px;
-  background: #fcfcfc;
-  .description {
-    margin-bottom: 10px;
-  }
-  .dndnode {
-    height: 20px;
-    padding: 4px;
-    border: 1px solid #1a192b;
-    border-radius: 2px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: grab;
+  .save__controls {
+    position: absolute;
+    z-index: 100;
+    right: 10px;
+    top: 200px;
   }
 
-  .dndnodeInput {
-    height: 20px;
-    padding: 4px;
-    border: 1px solid #0041d0;
-    border-radius: 2px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: grab;
+  .save__controls2 {
+    position: absolute;
+    z-index: 100;
+    right: 10px;
+    top: 240px;
   }
 
-  .dndnodeOutput {
-    height: 20px;
-    padding: 4px;
-    border: 1px solid #ff0072;
-    border-radius: 2px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: grab;
+  .save__controls button {
+    background-color: white;
+    width: 16rem;
+
+    @include responsive(mobile4) {
+      font-size: nth($fontSize, 1);
+      padding: 0;
+    }
+  }
+
+  .save__controls2 button {
+    background-color: white;
+    width: 16rem;
+
+    @include responsive(mobile4) {
+      font-size: nth($fontSize, 1);
+      padding: 0;
+    }
+  }
+
+  .updatenode__controls {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 4;
+    font-size: 12px;
+    width: 16rem;
+  }
+
+  .updatenode__controls label {
+    display: block;
   }
 }

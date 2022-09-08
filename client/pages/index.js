@@ -1,80 +1,112 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Modal, Button, Form, Input, Space, Row } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import React, { useState, useCallback, useEffect } from "react";
 import ReactFlow, {
-  ReactFlowProvider,
   addEdge,
+  Background,
   useNodesState,
   useEdgesState,
-  Controls,
-  Background,
-  useNodes,
+  ReactFlowProvider,
+  useKeyPress,
 } from "react-flow-renderer";
 
-import Sidebar from "../components/Sidebar";
 import Styles from "styles/ReactFlow.module.scss";
-import QuestionNode from "../components/QuestionNode";
+import { Button, Form, Input, Modal } from "antd";
 
-const nodeTypes = { questionNode: QuestionNode };
+let id = 1;
+const getNodeId = () => `${id++}`;
 
-let id = 0;
-const getId = () => `dndnode_${id++}`;
+const initialNodes = [
+  {
+    id: "1",
+    data: { label: "Add starting question" },
+    position: { x: 250, y: 180 },
+    className: "light",
+    style: { backgroundColor: "rgba(255, 0, 0, 0.2)", width: 200, height: 400 },
+  },
+  {
+    id: "1a",
+    data: { label: "Add option 1" },
+    position: { x: 20, y: 50 },
+    parentNode: "1",
+    type: "input",
+    extent: "parent",
+  },
+  {
+    id: "1b",
+    data: { label: "Add option 2" },
+    position: { x: 20, y: 120 },
+    parentNode: "1",
+    type: "input",
+    extent: "parent",
+  },
+];
 
-const Dnd = () => {
-  const [startingNode, setStartingNode] = useState({});
-
-  const reactFlowWrapper = useRef(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+const Develop = () => {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
-  useEffect(() => {
-    setNodes([
-      {
-        id: "1",
-        type: "questionNode",
-        data: startingNode,
-        position: { x: 250, y: 5 },
-      },
-    ]);
-  }, [startingNode]);
+  const [nodeName, setNodeName] = useState("NodeName");
+  const [nodeId, setNodeId] = useState("-1");
+  const [parentId, setParentId] = useState("-1");
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
-    []
+    [setEdges]
   );
 
-  const onDragOver = useCallback((event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-  }, []);
+  const onAddOption = useCallback(() => {
+    // setIsModalOpen(true);
+    const newNode = {
+      id: getNodeId(),
+      data: { label: "Added node" },
+      position: {
+        x: Math.random() * window.innerWidth - 100,
+        y: Math.random() * window.innerHeight,
+      },
+      // parentNode: parentId,
+      type: "input",
+      // extent: "parent",
+    };
+    setNodes((nds) => nds.concat(newNode));
+  }, [setNodes]);
 
-  const onDrop = useCallback(
-    (event) => {
-      event.preventDefault();
+  const onAddQuestion = useCallback(() => {
+    const newNode = {
+      id: getNodeId(),
+      data: { label: "Add starting question" },
+      className: "light",
+      style: {
+        backgroundColor: "rgba(255, 0, 0, 0.2)",
+        width: 200,
+        height: 400,
+      },
+      position: {
+        x: Math.random() * window.innerWidth - 500,
+        y: Math.random() * window.innerHeight - 300,
+      },
+      // type: "group",
+    };
+    setNodes((nds) => nds.concat(newNode));
+  }, [setNodes]);
 
-      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
-      const type = event.dataTransfer.getData("application/reactflow");
+  const onNodeClick = (e, object) => {
+    setNodeId(object.id);
+    setNodeName(" ");
+  };
 
-      if (typeof type === "undefined" || !type) {
-        return;
-      }
-
-      const position = reactFlowInstance.project({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      });
-      const newNode = {
-        id: getId(),
-        type,
-        position,
-        data: { label: `${type} node` },
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-    },
-    [reactFlowInstance]
-  );
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          node.data = {
+            ...node.data,
+            label: nodeName,
+          };
+        }
+        return node;
+      })
+    );
+  }, [nodeName, setNodes, nodeId]);
+  const spacePressed = useKeyPress("Space");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -82,84 +114,65 @@ const Dnd = () => {
     setIsModalOpen(true);
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <>
-      <div className={Styles.dndflow}>
-        {/* <ReactFlowProvider> */}
-        <div className={Styles.reactflowWrapper} ref={reactFlowWrapper}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onInit={setReactFlowInstance}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            onNodeClick={(event, node) => {
-              showModal();
-            }}
-            fitView
-            nodeTypes={nodeTypes}
-          >
-            <Controls />
-            <Background />
-          </ReactFlow>
-        </div>
-        <Sidebar />
-        {/* </ReactFlowProvider> */}
-        <Modal title="Set Question" open={isModalOpen} footer={null}>
+      <div className={Styles.floatingedges}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          panOnScroll={true}
+          panOnDrag={spacePressed}
+          onNodeClick={onNodeClick}
+        >
+          <div className={Styles.save__controls2}>
+            <Button onClick={onAddQuestion}>Add New Flow:</Button>
+          </div>
+          <div className={Styles.save__controls}>
+            <Button onClick={onAddOption}>Add Option to Question:</Button>
+          </div>
+          <div className={Styles.updatenode__controls}>
+            <label>Add text to selected node:</label>
+            <Input
+              value={nodeName}
+              onChange={(evt) => setNodeName(evt.target.value)}
+            />
+            <label>Id of selected node:</label>
+            <label>{nodeId}</label>
+            {/* <label>Add parent id of option:</label>
+            <Input
+              value={parentId}
+              onChange={(evt) => setParentId(evt.target.value)}
+            /> */}
+          </div>
+          <Background />
+        </ReactFlow>
+        <Modal open={isModalOpen} footer={null} onCancel={closeModal}>
+          <label>Add parent id of option:</label>
           <Form
-            name="dynamic_form_nest_item"
-            autoComplete="off"
-            layout="vertical"
             onFinish={(values) => {
-              setStartingNode(values);
-              setIsModalOpen(false);
+              setParentId(values.parId);
+              closeModal();
+              console.log(values.parId);
             }}
           >
-            <Form.Item name="question" label="Question">
-              <Input placeholder="Question" />
+            <Form.Item name="parId">
+              <Input />
             </Form.Item>
-            <Form.List name="options">
-              {(fields, { add, remove }) => (
-                <>
-                  {fields.map(({ key, name, ...restField }) => (
-                    <Row key={key}>
-                      <Form.Item
-                        key={key}
-                        {...restField}
-                        name={[name, "option"]}
-                      >
-                        <Input placeholder="Enter an option" />
-                      </Form.Item>
-                      <MinusCircleOutlined
-                        onClick={() => remove(name)}
-                        style={{
-                          marginLeft: 8,
-                          marginTop: 8,
-                        }}
-                      />
-                    </Row>
-                  ))}
-                  <Form.Item>
-                    <Button
-                      type="dashed"
-                      onClick={() => add()}
-                      block
-                      icon={<PlusOutlined />}
-                    >
-                      Add Reply Option
-                    </Button>
-                  </Form.Item>
-                </>
-              )}
-            </Form.List>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
-              </Button>
-            </Form.Item>
+            <Button
+              type="primary"
+              onClick={closeModal}
+              style={{ marginTop: "1rem" }}
+              htmlType="submit"
+            >
+              Submit
+            </Button>
           </Form>
         </Modal>
       </div>
@@ -169,6 +182,6 @@ const Dnd = () => {
 
 export default () => (
   <ReactFlowProvider>
-    <Dnd />
+    <Develop />
   </ReactFlowProvider>
 );
