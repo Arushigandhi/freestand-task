@@ -11,7 +11,7 @@ import ReactFlow, {
 import Styles from "styles/ReactFlow.module.scss";
 import { Button, Form, Input, Modal } from "antd";
 
-let id = 1;
+let id = 2;
 const getNodeId = () => `${id++}`;
 
 const initialNodes = [
@@ -46,7 +46,10 @@ const Develop = () => {
 
   const [nodeName, setNodeName] = useState("NodeName");
   const [nodeId, setNodeId] = useState("-1");
-  const [parentId, setParentId] = useState("-1");
+  const [parentId, setParentId] = useState("1");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [flag, setFlag] = useState(false);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -69,10 +72,32 @@ const Develop = () => {
     setNodes((nds) => nds.concat(newNode));
   }, [setNodes]);
 
+  // useEffect(() => {
+  //   if (!isModalOpen) {
+  //     console.log(parentId);
+  //     const newNode = {
+  //       id: getNodeId(),
+  //       data: { label: "Added node" },
+  //       position: {
+  //         x: Math.random() * window.innerWidth - 100,
+  //         y: Math.random() * window.innerHeight,
+  //       },
+  //       parentNode: getParentId(),
+  //       type: "input",
+  //       extent: "parent",
+  //     };
+  //     setNodes((nds) => nds.concat(newNode));
+  //   }
+  // }, [isModalOpen]);
+
+  const getParentId = () => {
+    return parentId;
+  };
+
   const onAddQuestion = useCallback(() => {
     const newNode = {
       id: getNodeId(),
-      data: { label: "Add starting question" },
+      data: { label: "Add question" },
       className: "light",
       style: {
         backgroundColor: "rgba(255, 0, 0, 0.2)",
@@ -108,8 +133,6 @@ const Develop = () => {
   }, [nodeName, setNodes, nodeId]);
   const spacePressed = useKeyPress("Space");
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -137,6 +160,16 @@ const Develop = () => {
           <div className={Styles.save__controls}>
             <Button onClick={onAddOption}>Add Option to Question:</Button>
           </div>
+          <div className={Styles.save__controls3}>
+            <Button
+              onClick={() => {
+                console.log(nodes);
+              }}
+            >
+              Finalise chatbots:
+            </Button>
+          </div>
+
           <div className={Styles.updatenode__controls}>
             <label>Add text to selected node:</label>
             <Input
@@ -154,20 +187,20 @@ const Develop = () => {
           <Background />
         </ReactFlow>
         <Modal open={isModalOpen} footer={null} onCancel={closeModal}>
-          <label>Add parent id of option:</label>
           <Form
+            label="Enter parent id of option:"
             onFinish={(values) => {
               setParentId(values.parId);
+              setFlag(true);
               closeModal();
               console.log(values.parId);
             }}
           >
             <Form.Item name="parId">
-              <Input />
+              <Input placeholder="Parent Id" />
             </Form.Item>
             <Button
               type="primary"
-              onClick={closeModal}
               style={{ marginTop: "1rem" }}
               htmlType="submit"
             >

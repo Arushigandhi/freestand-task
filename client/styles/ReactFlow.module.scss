@@ -30,6 +30,13 @@
     top: 240px;
   }
 
+  .save__controls3 {
+    position: absolute;
+    z-index: 100;
+    right: 10px;
+    top: 280px;
+  }
+
   .save__controls button {
     background-color: white;
     width: 16rem;
@@ -41,6 +48,16 @@
   }
 
   .save__controls2 button {
+    background-color: white;
+    width: 16rem;
+
+    @include responsive(mobile4) {
+      font-size: nth($fontSize, 1);
+      padding: 0;
+    }
+  }
+
+  .save__controls3 button {
     background-color: white;
     width: 16rem;
 
