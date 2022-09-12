@@ -10,6 +10,12 @@ import ReactFlow, {
 
 import Styles from "styles/ReactFlow.module.scss";
 import { Button, Form, Input, Modal } from "antd";
+import Chatbot from "react-chatbot-kit";
+import "react-chatbot-kit/build/main.css";
+
+import config from "utils/config.js";
+import MessageParser from "utils/MessageParser.js";
+import ActionProvider from "utils/ActionProvider.js";
 
 let id = 2;
 const getNodeId = () => `${id++}`;
@@ -68,6 +74,7 @@ const Develop = () => {
       // parentNode: parentId,
       type: "input",
       // extent: "parent",
+      // yo: "yo",
     };
     setNodes((nds) => nds.concat(newNode));
   }, [setNodes]);
@@ -215,6 +222,11 @@ const Develop = () => {
 
 export default () => (
   <ReactFlowProvider>
-    <Develop />
+    {/* <Develop /> */}
+    <Chatbot
+      config={config}
+      messageParser={MessageParser}
+      actionProvider={ActionProvider}
+    />
   </ReactFlowProvider>
 );
